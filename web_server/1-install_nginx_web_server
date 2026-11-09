@@ -1,0 +1,12 @@
+
+#!/usr/bin/env bash
+# Install Nginx and serve a page containing Holberton School.
+set -e
+
+apt-get update
+apt-get install -y nginx
+
+printf '%s\n' 'Holberton School for the win!' > /var/www/html/index.html
+
+nginx -t
+service nginx restart
