@@ -2,7 +2,7 @@
 file_line { 'Turn off passwd auth':
   ensure   => present,
   path     => '/etc/ssh/ssh_config',
-  line     => '    PasswordAuthentication no',
+  line     => 'PasswordAuthentication no',
   match    => '^\s*#?\s*PasswordAuthentication\s+',
   multiple => true,
 }
@@ -10,7 +10,7 @@ file_line { 'Turn off passwd auth':
 file_line { 'Declare identity file':
   ensure   => present,
   path     => '/etc/ssh/ssh_config',
-  line     => '    IdentityFile ~/.ssh/school',
+  line     => 'IdentityFile ~/.ssh/school',
   match    => '^\s*#?\s*IdentityFile\s+',
   multiple => true,
 }
