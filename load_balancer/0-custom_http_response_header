@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Installs nginx and adds a custom X-Served-By response header set to the server's hostname
+
+# Install nginx
+apt-get update -y
+apt-get install -y nginx
+
+# Create the home page and the custom 404 page
+echo "Holberton School for the win!" > /var/www/html/index.html
+echo "Ceci n'est pas une page" > /var/www/html/404.html
+
+# The nginx settings file we will edit
+config="/etc/nginx/sites-available/default"
+
+# Each "if" checks the line is not already there, so the script is safe to run twice
+# Send /redirect_me to another page (301 redirect)
+if ! grep -q "redirect_me" "$config"; then
+    sed -i '/server_name _;/a rewrite ^/redirect_me https://www.youtube.com/watch?v=QH2-TGUlwu4 permanent;' "$config"
+fi
+
+# Show our custom page when a page is not found
+if ! grep -q "error_page 404" "$config"; then
+    sed -i '/server_name _;/a error_page 404 /404.html;' "$config"
+fi
+
+# Add the X-Served-By header; nginx replaces $hostname with the server's name
+if ! grep -q "X-Served-By" "$config"; then
+    sed -i "/server_name _;/a add_header X-Served-By \$hostname;" "$config"
+fi
+
+# Restart nginx so the changes take effect
+service nginx restart

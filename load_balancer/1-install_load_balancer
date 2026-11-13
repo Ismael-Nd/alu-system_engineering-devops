@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Installs HAProxy and load balances traffic between web-01 and web-02 with roundrobin
+
+# IP addresses of the two web servers
+WEB01_IP="18.130.10.200"
+WEB02_IP="3.8.211.28"
+
+# Install HAProxy
+apt-get update -y
+apt-get install -y haproxy
+
+# Let the init script start and manage HAProxy
+echo "ENABLED=1" >> /etc/default/haproxy
+
+# The HAProxy settings file we will edit
+config="/etc/haproxy/haproxy.cfg"
+
+# Add our settings only once, so the script is safe to run twice
+# frontend: listen for visitors on port 80
+# backend: share the visitors between web-01 and web-02, one after the other (roundrobin)
+if ! grep -q "frontend web_frontend" "$config"; then
+    cat >> "$config" <<CFG
+
+frontend web_frontend
+    bind *:80
+    mode http
+    default_backend web_backend
+
+backend web_backend
+    mode http
+    balance roundrobin
+    server 7301-web-01 $WEB01_IP:80 check
+    server 7301-web-02 $WEB02_IP:80 check
+CFG
+fi
+
+# Restart HAProxy so the changes take effect
+service haproxy restart
