@@ -1,16 +1,42 @@
 #!/usr/bin/env bash
-# Installs nginx with a 301 redirect and a custom 404 page "Ceci n'est pas une page"
-apt-get update -y
+# Install Nginx with a permanent redirect and a custom HTTP 404 page.
+set -e
+
+if [ "$EUID" -ne 0 ]; then
+    exec sudo bash "$0" "$@"
+fi
+
+apt-get update
 apt-get install -y nginx
-echo "Holberton School for the win!" > /var/www/html/index.html
-echo "Ceci n'est pas une page" > /var/www/html/404.html
 
-config="/etc/nginx/sites-available/default"
-if ! grep -q "redirect_me" "$config"; then
-    sed -i '/server_name _;/a rewrite ^/redirect_me https://www.youtube.com/watch?v=QH2-TGUlwu4 permanent;' "$config"
-fi
-if ! grep -q "error_page 404" "$config"; then
-    sed -i '/server_name _;/a error_page 404 /404.html;' "$config"
-fi
+mkdir -p /var/www/html /etc/nginx/sites-available /etc/nginx/sites-enabled
+printf '%s\n' 'Holberton School for the win!' > /var/www/html/index.html
+printf '%s\n' "Ceci n'est pas une page" > /var/www/html/404.html
 
+cat > /etc/nginx/sites-available/default <<'NGINX'
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+
+    root /var/www/html;
+    index index.html;
+    error_page 404 /404.html;
+
+    location = /404.html {
+        internal;
+    }
+
+    location /redirect_me {
+        return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
+    }
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
+NGINX
+
+ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+nginx -t
 service nginx restart
