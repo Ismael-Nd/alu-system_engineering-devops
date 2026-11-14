@@ -1,32 +1,43 @@
 #!/usr/bin/env bash
-# Installs nginx and adds a custom X-Served-By response header set to the server's hostname
+# Install Nginx with an X-Served-By hostname header, redirect, and custom 404 page.
+set -e
 
-# Install nginx
-apt-get update -y
+if [ "$EUID" -ne 0 ]; then
+    exec sudo bash "$0" "$@"
+fi
+
+apt-get update
 apt-get install -y nginx
 
-# Create the home page and the custom 404 page
-echo "Holberton School for the win!" > /var/www/html/index.html
-echo "Ceci n'est pas une page" > /var/www/html/404.html
+mkdir -p /var/www/html /etc/nginx/sites-available /etc/nginx/sites-enabled
+printf '%s\n' 'Holberton School for the win!' > /var/www/html/index.html
+printf '%s\n' "Ceci n'est pas une page" > /var/www/html/404.html
 
-# The nginx settings file we will edit
-config="/etc/nginx/sites-available/default"
+# The quoted heredoc preserves Nginx variables for Nginx to evaluate.
+cat > /etc/nginx/sites-available/default <<'NGINX'
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
 
-# Each "if" checks the line is not already there, so the script is safe to run twice
-# Send /redirect_me to another page (301 redirect)
-if ! grep -q "redirect_me" "$config"; then
-    sed -i '/server_name _;/a rewrite ^/redirect_me https://www.youtube.com/watch?v=QH2-TGUlwu4 permanent;' "$config"
-fi
+    root /var/www/html;
+    index index.html;
+    add_header X-Served-By $hostname always;
+    error_page 404 /404.html;
 
-# Show our custom page when a page is not found
-if ! grep -q "error_page 404" "$config"; then
-    sed -i '/server_name _;/a error_page 404 /404.html;' "$config"
-fi
+    location = /404.html {
+        internal;
+    }
 
-# Add the X-Served-By header; nginx replaces $hostname with the server's name
-if ! grep -q "X-Served-By" "$config"; then
-    sed -i "/server_name _;/a add_header X-Served-By \$hostname;" "$config"
-fi
+    location /redirect_me {
+        return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
+    }
 
-# Restart nginx so the changes take effect
-service nginx restart
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
+NGINX
+
+ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+nginx -t
