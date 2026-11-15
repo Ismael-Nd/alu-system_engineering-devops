@@ -72,3 +72,4 @@ done
 
 The direct requests should report their respective hostnames. With both backends
 healthy and no other traffic, requests to the load balancer alternate between
+`7303-web-01` and `7303-web-02`.
