@@ -3,7 +3,7 @@
 set -e
 
 export DEBIAN_FRONTEND=noninteractive
-apt-get update
+apt-get update || true
 apt-get install -y nginx
 
 mkdir -p /var/www/html /etc/nginx/sites-available /etc/nginx/sites-enabled
@@ -12,7 +12,6 @@ printf '%s\n' 'Holberton School for the win!' > /var/www/html/index.html
 cat > /etc/nginx/sites-available/default <<'NGINX'
 server {
     listen 80 default_server;
-    listen [::]:80 default_server;
     server_name _;
 
     root /var/www/html;
@@ -31,4 +30,4 @@ NGINX
 
 ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 nginx -t
-service nginx restart
+service nginx restart || nginx

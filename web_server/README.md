@@ -18,9 +18,9 @@ Nginx configuration is checked before restarting with `service nginx restart`.
 From this directory, transfer the final installer and illustration:
 
 ```bash
-./0-transfer_file 4-not_found_page_404 3.10.209.204 ubuntu ~/.ssh/school
-./0-transfer_file 5-design_a_beautiful_404_page.html 3.10.209.204 ubuntu ~/.ssh/school
-ssh -i ~/.ssh/school ubuntu@3.10.209.204 'sudo bash ~/4-not_found_page_404'
+./0-transfer_file 4-not_found_page_404 13.40.131.171 ubuntu ~/.ssh/school
+./0-transfer_file 5-design_a_beautiful_404_page.html 13.40.131.171 ubuntu ~/.ssh/school
+ssh -i ~/.ssh/school ubuntu@13.40.131.171 'sudo bash ~/4-not_found_page_404'
 ```
 
 Use the private key authorized on your server. Task 4 installs the illustration
@@ -33,20 +33,20 @@ configuration, so run task 4 last when deploying the complete project.
 Verify externally:
 
 ```bash
-curl -i http://3.10.209.204/
-curl -I http://3.10.209.204/redirect_me
-curl -I http://3.10.209.204/redirect_me/
-curl -i http://3.10.209.204/missing-page
+curl -i http://13.40.131.171/
+curl -I http://13.40.131.171/redirect_me
+curl -I http://13.40.131.171/redirect_me/
+curl -i http://13.40.131.171/missing-page
 ```
 
 The expected statuses are 200, 301, 301, and 404. The homepage must contain
 `Holberton School`; the missing page must contain `Ceci n'est pas une page`.
-Task 5 submission URL: http://3.10.209.204/5-design_a_beautiful_404_page.html
+Task 5 submission URL: http://13.40.131.171/5-design_a_beautiful_404_page.html
 
 ## Domain task
 
 Registered domain: `ismaelnd.tech` (expires November 15, 2027).
-The root A record points to `3.10.209.204`, with automatic TTL, using
+The root A record points to `13.40.131.171`, with automatic TTL, using
 Namify's `ns1.dns.host` through `ns4.dns.host` nameservers.
 `2-setup_a_domain_name` contains only the root domain and a final newline.
 

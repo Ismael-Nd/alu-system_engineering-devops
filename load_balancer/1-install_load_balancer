@@ -38,7 +38,7 @@ frontend web_frontend
 
 backend web_backend
     balance roundrobin
-    server 7303-web-01 3.10.209.204:80 check
+    server 7303-web-01 13.40.131.171:80 check
     server 7303-web-02 16.60.159.142:80 check
 HAPROXY
 
