@@ -8,7 +8,7 @@ Nginx configuration is checked before restarting with `service nginx restart`.
 | --- | --- |
 | `0-transfer_file` | Copy a file to a user's home directory using an SSH key. |
 | `1-install_nginx_web_server` | Install Nginx, listen on port 80, and serve `Holberton School`. |
-| `2-setup_a_domain_name` | Must contain your registered root domain only; pending domain details. |
+| `2-setup_a_domain_name` | Registered root domain: `ismaelnd.tech`. |
 | `3-redirection` | Install the homepage and a 301 redirect from `/redirect_me`, including its trailing slash variant. |
 | `4-not_found_page_404` | Install the homepage, redirect, and custom HTTP 404 response. |
 | `5-design_a_beautiful_404_page.html` | Original, responsive Museum of Missing Pages illustration with the required French text. |
@@ -43,23 +43,28 @@ The expected statuses are 200, 301, 301, and 404. The homepage must contain
 `Holberton School`; the missing page must contain `Ceci n'est pas une page`.
 Task 5 submission URL: http://3.10.209.204/5-design_a_beautiful_404_page.html
 
-## Domain task (requires your registered domain)
+## Domain task
 
-Register the root domain using the project's .TECH benefit and verify that
-its registrar is `Dotserve Inc` as required by the assignment. Create an A
-record for `@` pointing to `3.10.209.204` in your DNS provider's dashboard.
-Create `2-setup_a_domain_name` containing only that domain plus a final newline
-(no scheme, path, or `www`). Do not submit an invented example domain.
+Registered domain: `ismaelnd.tech` (expires November 15, 2027).
+The root A record points to `3.10.209.204`, with automatic TTL, using
+Namify's `ns1.dns.host` through `ns4.dns.host` nameservers.
+`2-setup_a_domain_name` contains only the root domain and a final newline.
 
-Check `dig +short YOUR_DOMAIN A` after DNS propagation, and put your domain
-in the school profile's **Project website url** field.
+Allow time for DNS propagation. Verify with `dig +short ismaelnd.tech A`.
+Enter `http://ismaelnd.tech` in the ALU profile's **Project website url** field.
+
+Registrar verification on November 15, 2026: the registry RDAP record lists
+`InterNetX GmbH` (IANA 151), not the assignment’s required `Dotserve Inc`.
+The domain was registered through the current .TECH GitHub student offer.
+Ask ALU whether the current offer’s registrar is accepted before peer review.
+Registry record: https://rdap.radix.host/rdap/domain/ismaelnd.tech
 
 ## Validation
 
 ```bash
-bash -n 0-transfer_file 1-install_nginx_web_server 3-redirection 4-not_found_page_404
+for script in 0-transfer_file 1-install_nginx_web_server 3-redirection 4-not_found_page_404; do
+    bash -n "$script" || exit 1
+done
 shellcheck 0-transfer_file 1-install_nginx_web_server 3-redirection 4-not_found_page_404
 ```
 
-The installer writes `/etc/nginx/sites-available/default`, enables that site,
-and serves files from `/var/www/html`. It targets the project's fresh Ubuntu
