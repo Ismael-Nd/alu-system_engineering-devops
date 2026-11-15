@@ -2,11 +2,7 @@
 # Install Nginx and configure /redirect_me to return a permanent redirect.
 set -e
 
-# Installation and configuration need root when launched by the ubuntu user.
-if [ "$EUID" -ne 0 ]; then
-    exec sudo bash "$0" "$@"
-fi
-
+export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get install -y nginx
 
@@ -34,4 +30,3 @@ NGINX
 
 ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 nginx -t
-service nginx restart
