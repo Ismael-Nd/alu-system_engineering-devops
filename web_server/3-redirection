@@ -6,28 +6,18 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update || true
 apt-get install -y nginx
 
-mkdir -p /var/www/html /etc/nginx/sites-available /etc/nginx/sites-enabled
 printf '%s\n' 'Holberton School for the win!' > /var/www/html/index.html
 
-cat > /etc/nginx/sites-available/default <<'NGINX'
-server {
-    listen 80 default_server;
-    server_name _;
-
-    root /var/www/html;
-    index index.html;
-    add_header X-Served-By $hostname always;
-
-    location /redirect_me {
-        return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
+config=/etc/nginx/sites-available/default
+sed -i -f /dev/stdin "$config" <<'SED'
+/^[[:space:]]*listen \[::\]:80 default_server;/d
+/^[[:space:]]*server_name _;[[:space:]]*$/c\
+    server_name _;\
+    add_header X-Served-By $hostname always;\
+    location /redirect_me {\
+        return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;\
     }
+SED
 
-    location / {
-        try_files $uri $uri/ =404;
-    }
-}
-NGINX
-
-ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 nginx -t
 service nginx restart || nginx
