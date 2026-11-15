@@ -6,7 +6,8 @@ if [ "$EUID" -ne 0 ]; then
     exec sudo bash "$0" "$@"
 fi
 
-apt-get update
+export DEBIAN_FRONTEND=noninteractive
+apt-get update || true
 apt-get install -y haproxy
 
 # Enable the Ubuntu package's init script without duplicating the setting.
@@ -43,4 +44,4 @@ backend web_backend
 HAPROXY
 
 haproxy -c -f /etc/haproxy/haproxy.cfg
-service haproxy restart
+service haproxy restart || service haproxy start
