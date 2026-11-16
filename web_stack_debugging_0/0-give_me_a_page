@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Start Apache so the existing page can be served
+service apache2 start
