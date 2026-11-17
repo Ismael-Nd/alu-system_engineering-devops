@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Run Nginx as the nginx user on port 8080 for every IPv4 address.
+set -e
+
+if ! id -u nginx >/dev/null 2>&1; then
+    useradd -r -U -s /usr/sbin/nologin nginx
+fi
+
+service nginx stop || true
+
+sed -i 's#^[[:space:]]*pid[[:space:]].*#pid /tmp/nginx.pid;#' /etc/nginx/nginx.conf
+
+cat > /etc/nginx/sites-available/default <<'NGINX'
+server {
+    listen 0.0.0.0:8080 default_server;
+    server_name _;
+    root /var/www/html;
+    index index.html;
+}
+NGINX
+ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+
+nginx_group=$(id -gn nginx)
+for nginx_dir in /var/log/nginx /var/lib/nginx /var/cache/nginx; do
+    if [ -d "$nginx_dir" ]; then
+        chown -R "nginx:$nginx_group" "$nginx_dir"
+    fi
+done
+
+nginx -t
+su -s /bin/sh -c /usr/sbin/nginx nginx
