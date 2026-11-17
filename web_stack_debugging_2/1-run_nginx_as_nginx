@@ -7,8 +7,10 @@ if ! id -u nginx >/dev/null 2>&1; then
 fi
 
 service nginx stop || true
+service apache2 stop || true
+pkill apache2 || true
 
-sed -i 's#^[[:space:]]*pid[[:space:]].*#pid /tmp/nginx.pid;#' /etc/nginx/nginx.conf
+sed -i 's#^[[:space:]]*pid[[:space:]].*#pid /var/lib/nginx/nginx.pid;#' /etc/nginx/nginx.conf
 
 cat > /etc/nginx/sites-available/default <<'NGINX'
 server {
@@ -21,11 +23,13 @@ NGINX
 ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 
 nginx_group=$(id -gn nginx)
+chgrp "$nginx_group" /etc/nginx/nginx.conf
+chmod 640 /etc/nginx/nginx.conf
 for nginx_dir in /var/log/nginx /var/lib/nginx /var/cache/nginx; do
     if [ -d "$nginx_dir" ]; then
         chown -R "nginx:$nginx_group" "$nginx_dir"
     fi
 done
 
-nginx -t
+su -s /bin/sh -c '/usr/sbin/nginx -t' nginx
 su -s /bin/sh -c /usr/sbin/nginx nginx
