@@ -54,7 +54,8 @@ sudo bash ~/1-install_load_balancer
 
 The script installs HAProxy, enables its packaged init script, and configures
 roundrobin balancing between the two web IPs with TCP health checks. It validates
-the configuration before restarting. Manage it with `sudo service haproxy status`,
+the configuration before restarting and waits for both backends to answer.
+Manage it with `sudo service haproxy status`,
 `start`, `stop`, or `restart`.
 
 Allow inbound TCP port 80 on all three servers in their cloud security groups and

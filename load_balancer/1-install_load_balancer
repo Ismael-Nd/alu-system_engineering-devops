@@ -4,7 +4,7 @@ set -e
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update || true
-apt-get install -y haproxy
+apt-get install -y haproxy curl
 
 # Enable the Ubuntu package's init script without duplicating the setting.
 if grep -q '^ENABLED=' /etc/default/haproxy; then
@@ -35,9 +35,27 @@ frontend web_frontend
 
 backend web_backend
     balance roundrobin
-    server 7303-web-01 3.10.209.204:80 check
-    server 7303-web-02 16.60.159.142:80 check
+    server web-01 3.10.209.204:80 check
+    server web-02 16.60.159.142:80 check
 HAPROXY
 
 haproxy -c -f /etc/haproxy/haproxy.cfg
 service haproxy restart || service haproxy start
+
+seen_web_01=0
+seen_web_02=0
+for ((attempt = 0; attempt < 20; attempt++)); do
+    response=$(curl -fsSI --max-time 2 http://127.0.0.1/ || true)
+    case "$response" in
+        *web-01*) seen_web_01=1 ;;
+        *web-02*) seen_web_02=1 ;;
+    esac
+    if [ "$seen_web_01" -eq 1 ] && [ "$seen_web_02" -eq 1 ]; then
+        printf 'web-01 and web-02 are ready\n'
+        exit 0
+    fi
+    sleep 1
+done
+
+printf 'Both web backends did not become ready\n' >&2
+exit 1
