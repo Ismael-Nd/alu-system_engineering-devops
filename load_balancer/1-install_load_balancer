@@ -2,10 +2,6 @@
 # Install HAProxy with init-script support and roundrobin across both web servers.
 set -e
 
-if [ "$EUID" -ne 0 ]; then
-    exec sudo bash "$0" "$@"
-fi
-
 export DEBIAN_FRONTEND=noninteractive
 apt-get update || true
 apt-get install -y haproxy
@@ -39,7 +35,7 @@ frontend web_frontend
 
 backend web_backend
     balance roundrobin
-    server 7303-web-01 13.40.131.171:80 check
+    server 7303-web-01 3.10.209.204:80 check
     server 7303-web-02 16.60.159.142:80 check
 HAPROXY
 

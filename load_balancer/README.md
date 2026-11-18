@@ -5,7 +5,7 @@ not on the local Omarchy workstation.
 
 | Role | Hostname | IP |
 | --- | --- | --- |
-| Web server | 7303-web-01 | 13.40.131.171 |
+| Web server | 7303-web-01 | 3.10.209.204 |
 | Web server | 7303-web-02 | 16.60.159.142 |
 | Load balancer | 7303-lb-01 | 13.135.253.118 |
 
@@ -17,7 +17,7 @@ passphrase.
 
 ```bash
 cd /run/media/ismail/Data/Development/alu-system_engineering-devops
-ssh -i ~/.ssh/school ubuntu@13.40.131.171 'sudo hostnamectl set-hostname 7303-web-01 && sudo bash -s' < load_balancer/0-custom_http_response_header
+ssh -i ~/.ssh/school ubuntu@3.10.209.204 'sudo hostnamectl set-hostname 7303-web-01 && sudo bash -s' < load_balancer/0-custom_http_response_header
 ssh -i ~/.ssh/school ubuntu@16.60.159.142 'sudo hostnamectl set-hostname 7303-web-02 && sudo bash -s' < load_balancer/0-custom_http_response_header
 ssh -i ~/.ssh/school ubuntu@13.135.253.118 'sudo hostnamectl set-hostname 7303-lb-01 && sudo bash -s' < load_balancer/1-install_load_balancer
 ```
@@ -63,13 +63,14 @@ any active host firewall. Allow SSH port 22 from your workstation.
 ## Verify from your workstation
 
 ```bash
-curl -sI http://13.40.131.171/
+curl -sI http://3.10.209.204/
 curl -sI http://16.60.159.142/
 for request in 1 2 3 4; do
-    curl -sI http://13.135.253.118/ | grep -i '^X-Served-By:'
+    curl -sI https://www.ismaelnd.tech/ | grep -i '^X-Served-By:'
 done
 ```
 
 The direct requests should report their respective hostnames. With both backends
-healthy and no other traffic, requests to the load balancer alternate between
-`7303-web-01` and `7303-web-02`.
+healthy and no other traffic, HTTPS requests to the live load balancer alternate
+between `7303-web-01` and `7303-web-02`. The live balancer redirects HTTP to
+HTTPS.
