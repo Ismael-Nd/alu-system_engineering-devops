@@ -1,23 +1,26 @@
 #!/usr/bin/env bash
-# Install Nginx and configure /redirect_me to return a permanent redirect.
-set -e
+# Install Nginx and configure /redirect_me to return a 301 Moved Permanently.
 
-export DEBIAN_FRONTEND=noninteractive
-apt-get update || true
+apt-get update -y
 apt-get install -y nginx
 
-printf '%s\n' 'Holberton School for the win!' > /var/www/html/index.html
+mkdir -p /var/www/html /etc/nginx/sites-available /etc/nginx/sites-enabled
+echo "Holberton School for the win!" > /var/www/html/index.html
 
-config=/etc/nginx/sites-available/default
-sed -i -f /dev/stdin "$config" <<'SED'
-/^[[:space:]]*listen \[::\]:80 default_server;/d
-/^[[:space:]]*server_name _;[[:space:]]*$/c\
-    server_name _;\
-    add_header X-Served-By $hostname always;\
-    location /redirect_me {\
-        return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;\
+cat > /etc/nginx/sites-available/default <<'EOF'
+server {
+    listen 80 default_server;
+    root /var/www/html;
+    index index.html;
+    server_name _;
+
+    rewrite ^/redirect_me/?$ https://www.youtube.com/watch?v=QH2-TGUlwu4 permanent;
+
+    location / {
+        try_files $uri $uri/ =404;
     }
-SED
+}
+EOF
 
-nginx -t
-service nginx restart || nginx
+ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+service nginx restart

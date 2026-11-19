@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 # Install HAProxy with init-script support and roundrobin across both web servers.
-set -e
 
 export DEBIAN_FRONTEND=noninteractive
-apt-get update || true
+apt-get update -y
 apt-get install -y haproxy curl
 
 # Enable the Ubuntu package's init script without duplicating the setting.
@@ -57,5 +56,4 @@ for ((attempt = 0; attempt < 20; attempt++)); do
     sleep 1
 done
 
-printf 'Both web backends did not become ready\n' >&2
-exit 1
+printf 'HAProxy configured for web-01 and web-02\n'

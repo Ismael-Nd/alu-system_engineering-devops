@@ -1,40 +1,29 @@
 #!/usr/bin/env bash
-# Install Nginx with an X-Served-By hostname header, redirect, and custom 404 page.
-set -e
+# Install Nginx and add an X-Served-By header containing the server's hostname.
 
-export DEBIAN_FRONTEND=noninteractive
-apt-get update || true
+apt-get update -y
 apt-get install -y nginx
 
 mkdir -p /var/www/html /etc/nginx/sites-available /etc/nginx/sites-enabled
-printf '%s\n' 'Holberton School for the win!' > /var/www/html/index.html
-printf '%s\n' "Ceci n'est pas une page" > /var/www/html/404.html
+echo "Holberton School for the win!" > /var/www/html/index.html
+echo "Ceci n'est pas une page" > /var/www/html/404.html
 
-# The quoted heredoc preserves Nginx variables for Nginx to evaluate.
-cat > /etc/nginx/sites-available/default <<'NGINX'
+cat > /etc/nginx/sites-available/default <<'EOF'
 server {
     listen 80 default_server;
-    server_name _;
-
     root /var/www/html;
     index index.html;
-    add_header X-Served-By $hostname always;
+    server_name _;
+
+    add_header X-Served-By $hostname;
+    rewrite ^/redirect_me/?$ https://www.youtube.com/watch?v=QH2-TGUlwu4 permanent;
     error_page 404 /404.html;
-
-    location = /404.html {
-        internal;
-    }
-
-    location /redirect_me {
-        return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
-    }
 
     location / {
         try_files $uri $uri/ =404;
     }
 }
-NGINX
+EOF
 
 ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
-nginx -t
-service nginx restart || nginx
+service nginx restart
